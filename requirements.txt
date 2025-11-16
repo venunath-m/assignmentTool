@@ -7,3 +7,5 @@ requests
 pillow
 streamlit-lottie
 deep-translator
+openai
+python-dotenv

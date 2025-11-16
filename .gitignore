@@ -1,0 +1,55 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+env/
+.env
+.env.local
+
+# Python packages
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+*.whl
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# macOS system files
+.DS_Store
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+
+# Docker files (optional, if you don't want Docker build files in Git)
+# docker-compose.override.yml
+# .docker/
+
+# Streamlit cache & session
+.streamlit/
+
+# VSCode
+.vscode/
+
+# PyCharm
+.idea/
+
+# Coverage reports
+htmlcov/
+.coverage
+
+# Test output
+pytest_cache/
+
+# Node modules (if any front-end or JS code)
+node_modules/
