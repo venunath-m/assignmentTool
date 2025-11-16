@@ -11,6 +11,7 @@ import requests
 import tempfile
 import time
 from pathlib import Path
+from styles import render_header, info_box, floating_icons
 
 # ---------------------------- Wikipedia setup ----------------------------
 wikipedia.set_lang("en")
@@ -103,10 +104,6 @@ def fetch_duckduckgo_content(keyword, max_points=10, retries=2):
     return None, []
 
 def fetch_and_prepare_image(img_url):
-    """
-    Fetch image from URL and convert to RGB JPEG suitable for DOCX/PDF.
-    Returns path to temporary JPEG file or None if failed.
-    """
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
                       "AppleWebKit/537.36 (KHTML, like Gecko) "
@@ -127,7 +124,6 @@ def fetch_and_prepare_image(img_url):
     except Exception as e:
         print(f"Failed to process image {img_url}: {e}")
         return None
-
 
 # ---------------------------- Assignment Generation ----------------------------
 def generate_assignment(keywords, max_points=10, max_images=3):
@@ -157,8 +153,6 @@ def generate_assignment(keywords, max_points=10, max_images=3):
             key_points = ["[No key points available]"]
 
         conclusion = f"In summary, {kw} is an important topic in its field."
-
-        # Fix: create key points string outside f-string
         key_points_str = "\n- ".join(key_points)
 
         section = f"""1. Introduction
@@ -176,22 +170,18 @@ def generate_assignment(keywords, max_points=10, max_images=3):
 
     return combined_content.strip(), all_suggestions, all_images
 
-
-# ---------------------------- DOCX Generation ----------------------------
+# ---------------------------- DOCX & PDF Generation ----------------------------
 def generate_docx(content, images_dict, title="Assignment"):
     doc = Document()
     doc.add_heading(title, 0)
     
     topics = content.split("="*50)
-    
     for topic_section in topics:
         if not topic_section.strip():
             continue
-        
         doc.add_paragraph(topic_section.strip())
         lines = topic_section.strip().split("\n")
         topic_name = lines[0].replace("=== Topic: ", "").strip() if lines else None
-
         if topic_name and topic_name in images_dict:
             for img_url in images_dict[topic_name]:
                 tmp_file = fetch_and_prepare_image(img_url)
@@ -200,13 +190,11 @@ def generate_docx(content, images_dict, title="Assignment"):
                         doc.add_picture(tmp_file, width=Inches(4))
                     except:
                         continue
-
     f = BytesIO()
     doc.save(f)
     f.seek(0)
     return f
 
-# ---------------------------- PDF Generation ----------------------------
 def generate_pdf(content, images_dict, title="Assignment"):
     pdf = FPDF()
     pdf.add_page()
@@ -236,32 +224,38 @@ def generate_pdf(content, images_dict, title="Assignment"):
     return f
 
 # ---------------------------- Streamlit UI ----------------------------
-# Path to assets folder
 assets_path = Path(__file__).parent / "assets"
 
-# Page config with custom logo
 st.set_page_config(
     page_title="Assignment Generator",
-    page_icon=str(assets_path / "logo.png")
+    page_icon=str(assets_path / "logo.png"),
+    layout="wide"
 )
 
-# Title with logo in markdown
-st.markdown(
-    "<h1 style='display:flex; align-items:center;'>"
-    "<img src='assets/logo.png' width='50' style='margin-right:10px;'> "
-    "Student Assignment Generator</h1>",
-    unsafe_allow_html=True
-)
+# 🎉 Fun UI
+floating_icons()
+render_header(assets_path, lottie_url="https://assets6.lottiefiles.com/packages/lf20_jcikwtux.json")
+
+# Motivational Banner
+st.markdown("""
+<div style='background: linear-gradient(90deg, #ff6ec4, #42e695);
+            padding:20px; border-radius:15px; margin-top:15px; text-align:center; color:white; 
+            font-family:Comic Sans MS; box-shadow:0 5px 15px rgba(0,0,0,0.2);'>
+    🚀 Let's Explore & Learn! Generate Assignments like a Pro! 📝
+</div>
+""", unsafe_allow_html=True)
+
+info_box()
 st.write("Input your topic keywords and get a structured assignment with images and downloads.")
 
-# Session state
+# ---------------------------- Session State ----------------------------
 if "assignment_generated" not in st.session_state:
     st.session_state.assignment_generated = False
     st.session_state.assignment_content = ""
     st.session_state.suggestions = {}
     st.session_state.images_dict = {}
 
-# Inputs
+# ---------------------------- Inputs ----------------------------
 keywords_input = st.text_area(
     "Enter keywords/topics (comma-separated)", 
     placeholder="e.g., Photosynthesis, Chlorophyll, Light Reactions",
@@ -271,10 +265,9 @@ output_format = st.radio("Select output format:", ["DOCX", "PDF"])
 max_points = st.number_input("Maximum key points per topic:", min_value=3, max_value=20, value=10)
 max_images = st.number_input("Maximum images per topic:", min_value=1, max_value=5, value=3)
 
-# Generate button (unique key)
-generate_clicked = st.button("Generate Assignment", key="generate_btn")
+# ---------------------------- Generate Assignment Button ----------------------------
+generate_clicked = st.button("📝 Generate Assignment", key="generate_btn")
 
-# Generate assignment if clicked or already generated
 if generate_clicked or st.session_state.assignment_generated:
     if not st.session_state.assignment_generated:
         if not keywords_input.strip():
@@ -283,27 +276,25 @@ if generate_clicked or st.session_state.assignment_generated:
             keywords = [kw.strip() for kw in keywords_input.split(",") if kw.strip()]
             st.info("Generating assignment... this may take a few seconds.")
 
-            # Generate assignment
             assignment_content, suggestions, images_dict = generate_assignment(
                 keywords, max_points=max_points, max_images=max_images
             )
 
-            # Store in session state
             st.session_state.assignment_content = assignment_content
             st.session_state.suggestions = suggestions
             st.session_state.images_dict = images_dict
             st.session_state.assignment_generated = True
 
-    # Show suggestions
+    # Suggestions
     for kw, sug in st.session_state.suggestions.items():
         if sug:
             st.warning(f"Suggestions for '{kw}': {', '.join(sug)}")
 
-    # Assignment preview
+    # Assignment Preview
     st.subheader("📄 Assignment Preview")
     st.text_area("Preview", value=st.session_state.assignment_content, height=400)
 
-    # Image preview + downloads
+    # Image Preview + Downloads
     for topic, imgs in st.session_state.images_dict.items():
         if imgs:
             st.subheader(f"Images for topic: {topic}")
@@ -319,7 +310,7 @@ if generate_clicked or st.session_state.assignment_generated:
                             mime="image/jpeg"
                         )
 
-    # Assignment download
+    # Assignment Download
     file_name = "Assignment_" + "_".join([kw.replace(" ", "_") for kw in keywords_input.split(",") if kw.strip()])
     if output_format == "DOCX":
         file_data = generate_docx(st.session_state.assignment_content, st.session_state.images_dict, title=file_name)
