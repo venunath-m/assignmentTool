@@ -1,0 +1,7 @@
+streamlit
+wikipedia
+duckduckgo-search
+python-docx
+fpdf2
+requests
+pillow
