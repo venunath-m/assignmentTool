@@ -158,20 +158,24 @@ def generate_assignment(keywords, max_points=10, max_images=3):
 
         conclusion = f"In summary, {kw} is an important topic in its field."
 
+        # Fix: create key points string outside f-string
+        key_points_str = "\n- ".join(key_points)
+
         section = f"""1. Introduction
 {intro}
 
 2. Key Points
-- {'\n- '.join(key_points)}
+- {key_points_str}
 
 3. Conclusion
 {conclusion}
 
-{'='*50}\n
+{'='*50}
 """
         combined_content += section
 
     return combined_content.strip(), all_suggestions, all_images
+
 
 # ---------------------------- DOCX Generation ----------------------------
 def generate_docx(content, images_dict, title="Assignment"):
