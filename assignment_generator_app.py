@@ -22,12 +22,12 @@ import os
 # ---------------------------- Paths ----------------------------
 FONTS_FOLDER = Path(__file__).parent / "fonts"
 ASSETS_FOLDER = Path(__file__).parent / "assets"
-# Initialize client
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
 
 # ---------------------------- Load OpenAI API Key ----------------------------
 load_dotenv()
-
+# Initialize client
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 # ---------------------------- Wikipedia Setup ----------------------------
 wikipedia.set_lang("en")
 wikipedia.set_rate_limiting(True)
