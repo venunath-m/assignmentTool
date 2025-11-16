@@ -268,23 +268,26 @@ max_images = st.number_input("Maximum images per topic:", min_value=1, max_value
 # ---------------------------- Generate Assignment Button ----------------------------
 generate_clicked = st.button("📝 Generate Assignment", key="generate_btn")
 
-if generate_clicked or st.session_state.assignment_generated:
-    if not st.session_state.assignment_generated:
-        if not keywords_input.strip():
-            st.warning("Please enter at least one keyword/topic!")
-        else:
-            keywords = [kw.strip() for kw in keywords_input.split(",") if kw.strip()]
-            st.info("Generating assignment... this may take a few seconds.")
+if generate_clicked:
+    if not keywords_input.strip():
+        st.warning("Please enter at least one keyword/topic!")
+    else:
+        keywords = [kw.strip() for kw in keywords_input.split(",") if kw.strip()]
+        st.info("Generating assignment... this may take a few seconds.")
 
-            assignment_content, suggestions, images_dict = generate_assignment(
-                keywords, max_points=max_points, max_images=max_images
-            )
+        # Generate assignment
+        assignment_content, suggestions, images_dict = generate_assignment(
+            keywords, max_points=max_points, max_images=max_images
+        )
 
-            st.session_state.assignment_content = assignment_content
-            st.session_state.suggestions = suggestions
-            st.session_state.images_dict = images_dict
-            st.session_state.assignment_generated = True
+        # Update session state
+        st.session_state.assignment_content = assignment_content
+        st.session_state.suggestions = suggestions
+        st.session_state.images_dict = images_dict
+        st.session_state.assignment_generated = True
 
+# ---------------------------- Display Generated Assignment ----------------------------
+if st.session_state.assignment_generated:
     # Suggestions
     for kw, sug in st.session_state.suggestions.items():
         if sug:
