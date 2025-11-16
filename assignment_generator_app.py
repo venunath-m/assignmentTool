@@ -15,17 +15,18 @@ from styles import render_header, info_box, floating_icons
 from languages import language_code_map
 from language_font import language_font_map
 from deep_translator import GoogleTranslator
-import openai
+from openai import OpenAI
 from dotenv import load_dotenv
 import os
 
 # ---------------------------- Paths ----------------------------
 FONTS_FOLDER = Path(__file__).parent / "fonts"
 ASSETS_FOLDER = Path(__file__).parent / "assets"
+# Initialize client
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # ---------------------------- Load OpenAI API Key ----------------------------
 load_dotenv()
-openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # ---------------------------- Wikipedia Setup ----------------------------
 wikipedia.set_lang("en")
@@ -148,9 +149,14 @@ def fetch_and_prepare_image(img_url):
 
 # ---------------------------- AI Content Enrichment ----------------------------
 def ai_enrich_content(topic, current_text):
+    """
+    Expand and improve the given content for a topic using OpenAI GPT-4.
+    Returns enriched text or error message if enrichment fails.
+    """
     prompt = f"Expand and improve the following content for topic '{topic}'. Make it clear and structured for assignment writing:\n\n{current_text}\n\nInclude clear introduction, key points, and examples if possible."
+
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-4",
             messages=[
                 {"role": "system", "content": "You are a helpful content writer assistant."},
