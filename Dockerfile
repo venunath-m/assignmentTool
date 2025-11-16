@@ -1,18 +1,20 @@
-# Base image
+# Use official Python image
 FROM python:3.11-slim
 
 # Set working directory
 WORKDIR /app
 
-# Copy app files
-COPY . /app
+# Copy dependencies
+COPY requirements.txt .
 
-# Upgrade pip and install dependencies
-RUN pip install --upgrade pip
-RUN pip install --no-cache-dir streamlit wikipedia duckduckgo-search python-docx fpdf2 requests pillow
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy app code
+COPY . .
 
 # Expose Streamlit port
 EXPOSE 8501
 
-# Run Streamlit
+# Run Streamlit app
 CMD ["streamlit", "run", "assignment_generator_app.py", "--server.port=8501", "--server.address=0.0.0.0", "--server.headless=true"]
